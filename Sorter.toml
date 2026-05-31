@@ -1,7 +1,0 @@
-[features]
-images = true
-documents = true
-audio = true
-video = true
-archives = true
-

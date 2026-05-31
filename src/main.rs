@@ -1,8 +1,8 @@
 use clap::Parser;
+use serde::Deserialize;
 use std::fs;
 use std::thread;
 use std::time::Duration;
-use serde::Deserialize;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -34,6 +34,18 @@ struct Features {
     archives: bool,
 }
 
+impl Default for Features {
+    fn default() -> Self {
+        Self {
+            images: true,
+            documents: true,
+            audio: true,
+            video: true,
+            archives: true,
+        }
+    }
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -47,6 +59,15 @@ impl Default for Config {
         }
     }
 }
+
+const DEFAULT_CONFIG: &str = r#"
+[features]
+images = true
+documents = true
+audio = true
+video = true
+archives = true
+"#;
 
 fn main() -> std::io::Result<()> {
     let args = Args::parse();
@@ -64,9 +85,14 @@ fn main() -> std::io::Result<()> {
 }
 
 fn run_once(args: &Args) -> std::io::Result<()> {
-    let config = fs::read_to_string("Sorter.toml").ok().and_then(|text| toml::from_str::<Config>(&text).ok()).unwrap_or_default();
+    let config_dir = dirs::config_dir().unwrap().join("file_sorter");
+    let config_path = config_dir.join("Sorter.toml");
     let downloads = dirs::download_dir().unwrap_or_else(|| std::env::current_dir().unwrap());
-    let folder = args.folder.clone().map(std::path::PathBuf::from).unwrap_or(downloads);
+    let folder = args
+        .folder
+        .clone()
+        .map(std::path::PathBuf::from)
+        .unwrap_or(downloads);
 
     let paths = fs::read_dir(&folder)?;
 
@@ -99,6 +125,15 @@ fn run_once(args: &Args) -> std::io::Result<()> {
         "lzip",
     ];
 
+    if !config_path.exists() {
+        fs::create_dir_all(&config_dir)?;
+        fs::write(&config_path, DEFAULT_CONFIG)?;
+        println!("Created config: {:?}", config_path);
+    }
+
+    let config_text = fs::read_to_string(&config_path)?;
+    let config: Config = toml::from_str(&config_text).unwrap_or_default();
+
     for entry in paths {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -121,15 +156,15 @@ fn run_once(args: &Args) -> std::io::Result<()> {
                     pdf_dir.join(file_name)
                 } else if config.features.images && images.contains(&ext.as_str()) {
                     images_count += 1;
-                    fs::create_dir_all(&img_dir)?;                    
+                    fs::create_dir_all(&img_dir)?;
                     img_dir.join(file_name)
                 } else if config.features.audio && audio.contains(&ext.as_str()) {
                     audio_count += 1;
-                    fs::create_dir_all(&audio_dir)?;                    
+                    fs::create_dir_all(&audio_dir)?;
                     audio_dir.join(file_name)
                 } else if config.features.video && video.contains(&ext.as_str()) {
                     video_count += 1;
-                    fs::create_dir_all(&video_dir)?;                    
+                    fs::create_dir_all(&video_dir)?;
                     video_dir.join(file_name)
                 } else if config.features.archives && archive.contains(&ext.as_str()) {
                     archive_count += 1;
