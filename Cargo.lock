@@ -139,7 +139,7 @@ checksum = "55d9ccda37e95b4f0978a3074b4a9939979103a7256459cfb449c9c84d1adf23"
 
 [[package]]
 name = "file_sorter-cli"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clap",
  "dirs",
