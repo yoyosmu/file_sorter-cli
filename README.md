@@ -41,6 +41,7 @@ Downloads/
 ├── music.mp3
 ├── video.mp4
 ├── file.pdf
+├── archive.zip
 ```
 
 After:
