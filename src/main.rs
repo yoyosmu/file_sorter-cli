@@ -1,5 +1,4 @@
 use clap::Parser;
-use file_format::FileFormat;
 use serde::Deserialize;
 use std::fs;
 use std::thread;
@@ -88,7 +87,9 @@ fn main() -> std::io::Result<()> {
 fn run_once(args: &Args) -> std::io::Result<()> {
     let config_dir = dirs::config_dir().unwrap().join("file_sorter");
     let config_path = config_dir.join("Sorter.toml");
+
     let downloads = dirs::download_dir().unwrap_or_else(|| std::env::current_dir().unwrap());
+
     let folder = args
         .folder
         .clone()
@@ -108,6 +109,23 @@ fn run_once(args: &Args) -> std::io::Result<()> {
     let audio_dir = folder.join("AUDIOs");
     let video_dir = folder.join("VIDs");
     let archive_dir = folder.join("ARCHIVEs");
+
+    let images = [
+        "jpg", "png", "webp", "jpeg", "gif", "avif", "tiff", "bmp", "raw", "heif", "heic",
+    ];
+    let docs = [
+        "docx", "pdf", "doc", "odt", "txt", "rtf", "xps", "xlsx", "csv", "ods",
+    ];
+    let audio = [
+        "mp3", "wav", "aac", "flac", "ogg", "wma", "aiff", "m4a", "dts", "opus",
+    ];
+    let video = [
+        "mp4", "avi", "mov", "webm", "flv", "wmv", "mpg", "mpeg", "3gp", "3g2", "m4v", "mkv",
+    ];
+    let archive = [
+        "zip", "tar", "gz", "bz2", "7z", "rar", "xz", "lzh", "lha", "taz", "pkg", "deb", "tgz",
+        "lzip",
+    ];
 
     if !config_path.exists() {
         fs::create_dir_all(&config_dir)?;
@@ -131,48 +149,42 @@ fn run_once(args: &Args) -> std::io::Result<()> {
                 None => continue,
             };
 
-            let format = FileFormat::from_file(&path).unwrap_or(FileFormat::ArbitraryBinaryData);
+            if let Some(ext) = path.extension() {
+                let ext = ext.to_string_lossy().to_lowercase();
 
-            let media_type = format.media_type();
+                let dest = if config.features.documents && docs.contains(&ext.as_str()) {
+                    docs_count += 1;
+                    fs::create_dir_all(&pdf_dir)?;
+                    pdf_dir.join(file_name)
+                } else if config.features.images && images.contains(&ext.as_str()) {
+                    images_count += 1;
+                    fs::create_dir_all(&img_dir)?;
+                    img_dir.join(file_name)
+                } else if config.features.audio && audio.contains(&ext.as_str()) {
+                    audio_count += 1;
+                    fs::create_dir_all(&audio_dir)?;
+                    audio_dir.join(file_name)
+                } else if config.features.video && video.contains(&ext.as_str()) {
+                    video_count += 1;
+                    fs::create_dir_all(&video_dir)?;
+                    video_dir.join(file_name)
+                } else if config.features.archives && archive.contains(&ext.as_str()) {
+                    archive_count += 1;
+                    fs::create_dir_all(&archive_dir)?;
+                    archive_dir.join(file_name)
+                } else {
+                    continue;
+                };
 
-            let dest = if config.features.documents && media_type.starts_with("application/") {
-                docs_count += 1;
-                fs::create_dir_all(&pdf_dir)?;
-                pdf_dir.join(file_name)
-            } else if config.features.images && media_type.starts_with("image/") {
-                images_count += 1;
-                fs::create_dir_all(&img_dir)?;
-                img_dir.join(file_name)
-            } else if config.features.audio && media_type.starts_with("audio/") {
-                audio_count += 1;
-                fs::create_dir_all(&audio_dir)?;
-                audio_dir.join(file_name)
-            } else if config.features.video && media_type.starts_with("video/") {
-                video_count += 1;
-                fs::create_dir_all(&video_dir)?;
-                video_dir.join(file_name)
-            } else if config.features.archives
-                && (media_type.contains("zip")
-                    || media_type.contains("tar")
-                    || media_type.contains("gzip")
-                    || media_type.contains("7z")
-                    || media_type.contains("rar"))
-            {
-                archive_count += 1;
-                fs::create_dir_all(&archive_dir)?;
-                archive_dir.join(file_name)
-            } else {
-                continue;
-            };
-
-            if args.dry_run {
-                println!(
-                    "[DRY RUN] {:?} -> {:?}",
-                    path.file_name().unwrap(),
-                    dest.file_name().unwrap()
-                );
-            } else {
-                fs::rename(&path, &dest)?;
+                if args.dry_run {
+                    println!(
+                        "[DRY RUN] {:?} -> {:?}",
+                        path.file_name().unwrap(),
+                        dest.file_name().unwrap()
+                    );
+                } else {
+                    fs::rename(&path, &dest)?;
+                }
             }
         }
     }
