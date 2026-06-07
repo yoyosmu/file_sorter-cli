@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::thread;
 use std::time::Duration;
 mod sorter;
+mod extensions;
 
 #[derive(Parser, Debug)]
 #[command(

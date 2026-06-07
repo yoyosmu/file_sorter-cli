@@ -1,4 +1,5 @@
 use crate::{Args, Config, DEFAULT_CONFIG};
+use crate::extensions::{IMAGES, DOCS, AUDIO, VIDEO, ARCHIVE};
 use std::fs;
 
 pub fn main(args: &Args) -> std::io::Result<()> {
@@ -27,22 +28,6 @@ pub fn main(args: &Args) -> std::io::Result<()> {
     let video_dir = folder.join("VIDs");
     let archive_dir = folder.join("ARCHIVEs");
 
-    let images = [
-        "jpg", "jpeg", "png", "gif", "webp", "svg", "bmp", "tiff", "tif", "ico", "heic", "heif", "avif", "raw", "psd", "ai", "eps", "indd", "jfif", "pcx", "tga", "dds",
-    ];
-    let docs = [
-        "pdf", "docx", "doc", "txt", "rtf", "odt", "pages", "wps", "epub", "md", "tex", "xml", "html", "xhtml", "mobi", "fb2", "djvu", "abw", "sxw", "uot", "wpd", "ps", "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv", "tsv", 
-    ];
-    let audio = [
-        "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "alac", "opus", "amr", "mid", "midi", "ape", "au", "ra", "ac3", "dts", "caf", "pcm", "voc", "tta",
-    ];
-    let video = [
-        "mp4", "mkv", "mov", "avi", "wmv", "flv", "webm", "m4v", "mpeg", "mpg", "3gp", "ts", "mts", "m2ts", "vob", "ogv", "rm", "rmvb", "asf", "f4v", "divx", "hevc",
-    ];
-    let archive = [
-        "zip", "7z", "rar", "tar", "gz", "bz2", "xz", "tgz", "tbz2", "txz", "cab", "iso", "jar", "arj", "lzh", "z", "ace", "cpio", "dmg", "pak", "rpm", "deb",
-    ];
-
     if !config_path.exists() {
         fs::create_dir_all(&config_dir)?;
         fs::write(&config_path, DEFAULT_CONFIG)?;
@@ -68,23 +53,23 @@ pub fn main(args: &Args) -> std::io::Result<()> {
             if let Some(ext) = path.extension() {
                 let ext = ext.to_string_lossy().to_lowercase();
 
-                let dest = if config.features.documents && docs.contains(&ext.as_str()) {
+                let dest = if config.features.documents && DOCS.contains(&ext.as_str()) {
                     docs_count += 1;
                     fs::create_dir_all(&pdf_dir)?;
                     pdf_dir.join(file_name)
-                } else if config.features.images && images.contains(&ext.as_str()) {
+                } else if config.features.images && IMAGES.contains(&ext.as_str()) {
                     images_count += 1;
                     fs::create_dir_all(&img_dir)?;
                     img_dir.join(file_name)
-                } else if config.features.audio && audio.contains(&ext.as_str()) {
+                } else if config.features.audio && AUDIO.contains(&ext.as_str()) {
                     audio_count += 1;
                     fs::create_dir_all(&audio_dir)?;
                     audio_dir.join(file_name)
-                } else if config.features.video && video.contains(&ext.as_str()) {
+                } else if config.features.video && VIDEO.contains(&ext.as_str()) {
                     video_count += 1;
                     fs::create_dir_all(&video_dir)?;
                     video_dir.join(file_name)
-                } else if config.features.archives && archive.contains(&ext.as_str()) {
+                } else if config.features.archives && ARCHIVE.contains(&ext.as_str()) {
                     archive_count += 1;
                     fs::create_dir_all(&archive_dir)?;
                     archive_dir.join(file_name)
