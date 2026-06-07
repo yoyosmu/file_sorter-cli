@@ -28,20 +28,19 @@ pub fn main(args: &Args) -> std::io::Result<()> {
     let archive_dir = folder.join("ARCHIVEs");
 
     let images = [
-        "jpg", "png", "webp", "jpeg", "gif", "avif", "tiff", "bmp", "raw", "heif", "heic",
+        "jpg", "jpeg", "png", "gif", "webp", "svg", "bmp", "tiff", "tif", "ico", "heic", "heif", "avif", "raw", "psd", "ai", "eps", "indd", "jfif", "pcx", "tga", "dds",
     ];
     let docs = [
-        "docx", "pdf", "doc", "odt", "txt", "rtf", "xps", "xlsx", "csv", "ods",
+        "pdf", "docx", "doc", "txt", "rtf", "odt", "pages", "wps", "epub", "md", "tex", "xml", "html", "xhtml", "mobi", "fb2", "djvu", "abw", "sxw", "uot", "wpd", "ps", "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv", "tsv", 
     ];
     let audio = [
-        "mp3", "wav", "aac", "flac", "ogg", "wma", "aiff", "m4a", "dts", "opus",
+        "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "alac", "opus", "amr", "mid", "midi", "ape", "au", "ra", "ac3", "dts", "caf", "pcm", "voc", "tta",
     ];
     let video = [
-        "mp4", "avi", "mov", "webm", "flv", "wmv", "mpg", "mpeg", "3gp", "3g2", "m4v", "mkv",
+        "mp4", "mkv", "mov", "avi", "wmv", "flv", "webm", "m4v", "mpeg", "mpg", "3gp", "ts", "mts", "m2ts", "vob", "ogv", "rm", "rmvb", "asf", "f4v", "divx", "hevc",
     ];
     let archive = [
-        "zip", "tar", "gz", "bz2", "7z", "rar", "xz", "lzh", "lha", "taz", "pkg", "deb", "tgz",
-        "lzip",
+        "zip", "7z", "rar", "tar", "gz", "bz2", "xz", "tgz", "tbz2", "txz", "cab", "iso", "jar", "arj", "lzh", "z", "ace", "cpio", "dmg", "pak", "rpm", "deb",
     ];
 
     if !config_path.exists() {
